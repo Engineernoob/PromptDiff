@@ -5,7 +5,7 @@ impact an LLM’s behavior. Instead of focusing on surface-level text difference
 it highlights _meaningful behavioral shifts_ that affect cost, reliability, and
 model safety.
 
-👉 **Live Demo:** https://your-render-url-here  
+👉 **Live Demo:** https://promptdiff.onrender.com  
 👉 Built with **FastAPI**, **Jinja2**, and a clean minimal UI.
 
 ---
