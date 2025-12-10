@@ -1,0 +1,82 @@
+body {
+  background: #0e0e11;
+  font-family: system-ui, sans-serif;
+  color: #eaeaea;
+}
+
+main {
+  max-width: 900px;
+  margin: 4rem auto;
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 2.4rem;
+}
+
+.sub {
+  color: #9ca3af;
+  margin-bottom: 2rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+textarea {
+  background: #16161a;
+  border: 1px solid #27272a;
+  color: #eaeaea;
+  padding: 1rem;
+  min-height: 180px;
+  border-radius: 10px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  border: none;
+  background: white;
+  color: black;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.results {
+  margin-top: 3rem;
+  background: #16161a;
+  padding: 1.5rem;
+  border-radius: 14px;
+}
+
+.results ul {
+  padding-left: 1.2rem;
+}
+
+.delta {
+  margin-top: 0.6rem;
+  color: #f43f5e;
+}
+
+.risk {
+  margin-top: 0.6rem;
+  color: #f43f5e;
+  font-size: 0.9rem;
+}
+
+.why {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.reasons {
+  margin-top: 0.6rem;
+  color: #9ca3af;
+  padding-left: 1.2rem;
+}

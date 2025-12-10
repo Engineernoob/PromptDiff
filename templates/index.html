@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Diff</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Prompt Diff</h1>
+      <p class="sub">Understand how prompt edits change model behavior.</p>
+      <form method="post" enctype="application/x-www-form-urlencoded">
+        <div class="grid">
+          <textarea name="prompt_a" placeholder="Prompt A..." required></textarea>
+          <textarea name="prompt_b" placeholder="Prompt B..." required></textarea>
+        </div>
+        <button type="submit">Compare</button>
+      </form>
+    </main>
+    {% if insights %}
+    <section class="results">
+      <h2>Behavioral Changes</h2>
+      <ul>
+        {% for insight in insights %}
+        <li>{{ insight }}</li>
+        {% endfor %}
+      </ul>
+
+      <p class="delta">Δ Tokens: {{ delta }}</p>
+
+      <p class="risk">⚠️ Risk: {{ risk_band }} ({{ risk }}/10)</p>
+
+      {% if risk_reasons %}
+      <p class="why">Why this matters:</p>
+      <ul class="reasons">
+        {% for reason in risk_reasons %}
+        <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+    {% endif %}
+  </body>
+</html>
