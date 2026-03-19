@@ -111,6 +111,8 @@ def home(request: Request) -> HTMLResponse:
         "index.html",
         {
             "request": request,
+            "prompt_a": "",
+            "prompt_b": "",
             "insights": None,
             "delta": None,
             "risk": None,
@@ -133,6 +135,8 @@ def compare(
         "index.html",
         {
             "request": request,
+            "prompt_a": prompt_a,
+            "prompt_b": prompt_b,
             "insights": diff(analysis_a, analysis_b),
             "delta": analysis_b["tokens"] - analysis_a["tokens"],
             "risk": analysis_b["risk"],
