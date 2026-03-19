@@ -1,33 +1,49 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
+from typing import TypedDict
 import re
+
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+
+class AnalysisResult(TypedDict):
+    tokens: int
+    strong: int
+    uncertainty: int
+    role: bool
+    risk: int
+    risk_reasons: list[str]
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-def analyze(prompt: str):
+def analyze(prompt: str) -> AnalysisResult:
     tokens = len(prompt.split())
     text = prompt.lower()
 
-    strong_words = re.findall(r"\b(must|always|never|strict|exactly|only)\b", text)
+    strong_words: list[str] = re.findall(
+        r"\b(must|always|never|strict|exactly|only)\b",
+        text,
+    )
 
-    uncertainty_words = re.findall(r"\b(might|maybe|could|possibly|generally)\b", text)
+    uncertainty_words: list[str] = re.findall(
+        r"\b(might|maybe|could|possibly|generally)\b",
+        text,
+    )
 
     role_specified = bool(re.search(r"\b(you are|act as)\b", text))
 
     risk = 0
-    reasons = []
+    reasons: list[str] = []
 
-    # 1️⃣ Role clarity (highest impact)
     if not role_specified:
         risk += 3
         reasons.append("No role specified")
 
-    # 2️⃣ Prompt length extremes
     if tokens < 10:
         risk += 2
         reasons.append("Prompt very short → under-specified")
@@ -35,7 +51,6 @@ def analyze(prompt: str):
         risk += 1
         reasons.append("Very long prompt → higher drift risk")
 
-    # 3️⃣ Constraint balance
     if len(strong_words) == 0:
         risk += 2
         reasons.append("No hard constraints")
@@ -43,7 +58,6 @@ def analyze(prompt: str):
         risk += 1
         reasons.append("Over-constrained prompt")
 
-    # 4️⃣ Confidence signaling
     if len(uncertainty_words) == 0:
         risk += 1
         reasons.append("No uncertainty language")
@@ -63,8 +77,8 @@ def analyze(prompt: str):
     }
 
 
-def diff(a, b):
-    insights = []
+def diff(a: AnalysisResult, b: AnalysisResult) -> list[str]:
+    insights: list[str] = []
 
     if b["tokens"] > a["tokens"]:
         insights.append("More tokens → higher cost, more context")
@@ -83,16 +97,16 @@ def diff(a, b):
     return insights
 
 
-def risk_band(score: int):
+def risk_band(score: int) -> str:
     if score <= 3:
         return "Low"
-    elif score <= 6:
+    if score <= 6:
         return "Moderate"
     return "High"
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         "index.html",
         {
@@ -107,7 +121,11 @@ def home(request: Request):
 
 
 @app.post("/", response_class=HTMLResponse)
-def compare(request: Request, prompt_a: str = Form(...), prompt_b: str = Form(...)):
+def compare(
+    request: Request,
+    prompt_a: str = Form(...),
+    prompt_b: str = Form(...),
+) -> HTMLResponse:
     analysis_a = analyze(prompt_a)
     analysis_b = analyze(prompt_b)
 
@@ -121,4 +139,25 @@ def compare(request: Request, prompt_a: str = Form(...), prompt_b: str = Form(..
             "risk_band": risk_band(analysis_b["risk"]),
             "risk_reasons": analysis_b["risk_reasons"],
         },
+    )
+
+
+@app.post("/api/diff", response_class=JSONResponse)
+def api_diff(
+    prompt_a: str = Form(...),
+    prompt_b: str = Form(...),
+) -> JSONResponse:
+    analysis_a = analyze(prompt_a)
+    analysis_b = analyze(prompt_b)
+
+    return JSONResponse(
+        {
+            "behavior_changes": diff(analysis_a, analysis_b),
+            "token_delta": analysis_b["tokens"] - analysis_a["tokens"],
+            "risk_score": analysis_b["risk"],
+            "risk_band": risk_band(analysis_b["risk"]),
+            "risk_reasons": analysis_b["risk_reasons"],
+            "prompt_a_analysis": analysis_a,
+            "prompt_b_analysis": analysis_b,
+        }
     )
